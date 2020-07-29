@@ -11,7 +11,7 @@ import("syssvc/tBanner.cdl");
 // RPC thing
 import(<rpc/sChannel.cdl>);
 import(<rpc/TDR.cdl>);
-import(<rpc/tDataqueueOWChannel.cdl>);
+import(<rpc/tMessageBufferCEP.cdl>);
 
 // Target-specific part
 import("target.cdl");
@@ -90,30 +90,31 @@ region rKernelDomain {
 
 cell tKernel HRPKernel{};
 
-cell tApp App {
-    // Transmit the greeting request through the RPC channel.
-    cGreet = GreetClientProxy.eEntry;
-};
-
-// `tGreetClientProxy` is an RPC client proxy for the signature `sGreet`. The
-// proxy serializes the greeting request and sends it through some transport.
-cell tGreetClientProxy GreetClientProxy {
-    cChannel = GreetChannelToDataqueue.eChannel;
-};
-
-// `sChannel` → `cDataqueue` + `sEevntflag`
-cell tDataqueueAdaptor GreetChannelToDataqueue {
-    // TODO: Make this connection dynamic
-    cDataqueue = GreetTransport.eDataqueue;
-    cEventflag = GreetTransport.eEventflag;
-};
-
 [domain(HRP, "user")] region rAppDomain {
     cell tTask MainTask {
         cTaskBody = App.eMain;
         attribute = C_EXP("TA_ACT");
         priority = C_EXP("MAIN_PRIORITY");
         stackSize = C_EXP("STACK_SIZE");
+    };
+
+    cell tApp App {
+        // Transmit the greeting request through the RPC channel.
+        cGreet = GreetClientProxy.eEntry;
+    };
+
+    // `tGreetClientProxy` is an RPC client proxy for the signature `sGreet`.
+    // The proxy serializes the greeting request and sends it through some
+    // transport.
+    cell tGreetClientProxy GreetClientProxy {
+        cChannel = GreetChannelToMessageBuffer.eChannel;
+    };
+
+    // `sChannel` → `cMessageBuffer`
+    cell tMessageBufferCEP GreetChannelToMessageBuffer {
+        // TODO: Make this connection dynamic
+        cMessageBuffer0 = GreetTransport0.eMessageBuffer;
+        cMessageBuffer1 = GreetTransport1.eMessageBuffer;
     };
 }; // region rAppDomain
 
@@ -125,20 +126,27 @@ cell tDataqueueAdaptor GreetChannelToDataqueue {
 
 celltype tPerson { entry sGreet eGreet; };
 
-// `tDataqueue_INIB_tab` must be located in a region readable by a task running
-// in `rAppDomain`. This means we can't put this in `rServerDomain` unless we
-// also configure the memory access permission for the region. I'm not willing
-// to do this at the moment.
-cell tDataqueueOWChannel GreetTransport{};
+// `tMessageBuffer_INIB_tab` must be located in a region readable by a task
+// running in `rAppDomain`. This means we can't put this in `rServerDomain`
+// unless we also configure the memory access permission for the region. I'm not
+// willing to do this at the moment.
+cell tMessageBuffer GreetTransport0 {
+    maxMessageSize = 128;
+    bufferSize = 256;
+};
+cell tMessageBuffer GreetTransport1 {
+    maxMessageSize = 128;
+    bufferSize = 256;
+};
 
 [domain(HRP, "user")] region rServerDomain {
-    cell tDataqueueAdaptor GreetChannelToDataqueue2 {
-        cDataqueue = GreetTransport.eDataqueue;
-        cEventflag = GreetTransport.eEventflag;
+    cell tMessageBufferCEP GreetChannelToMessageBuffer2 {
+        cMessageBuffer0 = GreetTransport1.eMessageBuffer;
+        cMessageBuffer1 = GreetTransport0.eMessageBuffer;
     };
 
     cell tGreetServerProxy GreetServerProxy {
-        cChannel = GreetChannelToDataqueue2.eChannel;
+        cChannel = GreetChannelToMessageBuffer2.eChannel;
         cCall = Person.eGreet;
     };
 
