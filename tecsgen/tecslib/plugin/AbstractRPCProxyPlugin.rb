@@ -10,7 +10,7 @@ AbstractRPCProxyPluginArgProg = {
     "serverCelltypeName" => Proc.new { |obj, rhs| obj.set_server_celltype_name(rhs) },
 }
 
-# The signature plugin for generating a Abstact Opaque RPC client proxy.
+# The signature plugin for generating an Abstact Opaque RPC client/server proxy.
 #
 # Given a signature `sSignature`, this plugin generates a celltype like the
 # following:
@@ -60,7 +60,7 @@ class AbstractRPCProxyPlugin < SignaturePlugin
         @client_celltype_name = value
     end
 
-    # I suppose this is where the plugin is supposed to generate extra CDL code
+    # This is where the plugin is supposed to generate extra CDL code
     #
     #file:: File:
     def gen_cdl_file(file)
@@ -110,10 +110,6 @@ class AbstractRPCProxyPlugin < SignaturePlugin
         file.print "};\n"
     end
 
-    # Turns out, this isn't where you should generate CDL code. I don't know
-    # why and I'm not willing to sift through the generator's code to figure
-    # out why.
-    #
     #file:: File:
     def gen_post_code(file)
     end
@@ -157,8 +153,9 @@ end
 # We just need a portion of `GenOpaqueMarshaler`. To avoid it from
 # interfering with the existing members of `AtRPCClientProxyPlugin` (I don't
 # know if this actually happens, but I took precaution just in case. Personally
-# I think having this mix-in thingy in the language specification is an awful
-# idea), instantiate `GenOpaqueMarshaler` in a separate class.
+# I'm starting to feel like having this mix-in thingy in the language
+# specification is an awful idea), instantiate `GenOpaqueMarshaler` in a
+# separate class.
 #
 # Since there are no annotations regarding accessibility, I'm going to assume
 # *everything* inside `GenOpaqueMarshaler` is public and stable.

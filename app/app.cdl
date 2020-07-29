@@ -84,7 +84,8 @@ region rKernelDomain {
 
     /// The main module of the application will greet someone through this call
     /// port. As you have probably noticed, the call entry doesn't specify who
-    /// is the actual greetee.
+    /// is the actual greetee. This is how component-based development and
+    /// the service-oriented architecture work.
     call sGreet cGreet;
 };
 
@@ -130,8 +131,7 @@ celltype tPerson { entry sGreet eGreet; };
 
 // `tMessageBuffer_INIB_tab` must be located in a region readable by a task
 // running in `rAppDomain`. This means we can't put this in `rServerDomain`
-// unless we also configure the memory access permission for the region. I'm not
-// willing to do this at the moment.
+// unless we also configure the memory access permission for the region.
 cell tMessageBuffer GreetTransport0 {
     maxMessageSize = 128;
     bufferSize = 256;
@@ -171,6 +171,6 @@ cell tMessageBuffer GreetTransport1 {
         cMain = GreetServerProxy.eService;
     };
 
-    // This is the final destination of greeting requests.
+    // This is the destination of greeting requests.
     cell tPerson Person{};
 }; // region rServerDomain
