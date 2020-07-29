@@ -8,8 +8,15 @@ import("syssvc/tSysLogAdapter.cdl");
 import("syssvc/tLogTask.cdl");
 import("syssvc/tBanner.cdl");
 
+// RPC thing
+import(<rpc/sChannel.cdl>);
+import(<rpc/TDR.cdl>);
+import(<rpc/tDataqueueOWChannel.cdl>);
+
 // Target-specific part
 import("target.cdl");
+
+import("api.cdl");
 
 //////////////////////////////////////////////////////////////////////////
 //
@@ -74,14 +81,34 @@ region rKernelDomain {
 
     /// The entry point
     entry sTaskBody eMain;
+
+    /// The main module of the application will greet someone through this call
+    /// port. As you have probably noticed, the call entry doesn't specify who
+    /// is the actual greetee.
+    call sGreet cGreet;
 };
 
-cell tKernel HRPKernel {};
+cell tKernel HRPKernel{};
 
-cell tApp App {};
+cell tApp App {
+    // Transmit the greeting request through the RPC channel.
+    cGreet = GreetClientProxy.eEntry;
+};
 
-[domain(HRP, "user")]
-region rAppDomain {
+// `tGreetClientProxy` is an RPC client proxy for the signature `sGreet`. The
+// proxy serializes the greeting request and sends it through some transport.
+cell tGreetClientProxy GreetClientProxy {
+    cChannel = GreetChannelToDataqueue.eChannel;
+};
+
+// `sChannel` → `cDataqueue` + `sEevntflag`
+cell tDataqueueAdaptor GreetChannelToDataqueue {
+    // TODO: Make this connection dynamic
+    cDataqueue = rServerDomain::GreetTransport.eDataqueue;
+    cEventflag = rServerDomain::GreetTransport.eEventflag;
+};
+
+[domain(HRP, "user")] region rAppDomain {
     cell tTask MainTask {
         cTaskBody = App.eMain;
         attribute = C_EXP("TA_ACT");
@@ -89,3 +116,18 @@ region rAppDomain {
         stackSize = C_EXP("STACK_SIZE");
     };
 }; // region rAppDomain
+
+//////////////////////////////////////////////////////////////////////////
+//
+// The other domain
+//
+//////////////////////////////////////////////////////////////////////////
+
+[domain(HRP, "user")]
+region rServerDomain {
+
+cell tDataqueueOWChannel GreetTransport {};
+
+// TODO: server
+
+}; // region rServerDomain

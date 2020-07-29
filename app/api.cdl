@@ -1,0 +1,13 @@
+signature sGreet { ER greetInKlingon(void); };
+
+// Generate an RPC client proxy for the signature. The output looks like the
+// following:
+//
+//     composite tGreetClientProxy {
+//         entry sGreet eEntry;
+//         call sChannel cChannel;
+//         /* ... */
+//     }
+//
+generate(AbstractRPCClientProxyPlugin, sGreet,
+         "celltypeName = tGreetClientProxy");
