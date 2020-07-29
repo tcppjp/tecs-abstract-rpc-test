@@ -2,12 +2,12 @@
 #  TOPPERS/HRP Kernel
 #      Toyohashi Open Platform for Embedded Real-Time Systems/
 #      High Reliable system Profile Kernel
-# 
+#
 #  Copyright (C) 2000-2003 by Embedded and Real-Time Systems Laboratory
 #                              Toyohashi Univ. of Technology, JAPAN
 #  Copyright (C) 2006-2019 by Embedded and Real-Time Systems Laboratory
 #              Graduate School of Information Science, Nagoya Univ., JAPAN
-# 
+#
 #  上記著作権者は，以下の(1)〜(4)の条件を満たす場合に限り，本ソフトウェ
 #  ア（本ソフトウェアを改変したものを含む．以下同じ）を使用・複製・改
 #  変・再配布（以下，利用と呼ぶ）することを無償で許諾する．
@@ -30,15 +30,15 @@
 #      また，本ソフトウェアのユーザまたはエンドユーザからのいかなる理
 #      由に基づく請求からも，上記著作権者およびTOPPERSプロジェクトを
 #      免責すること．
-# 
+#
 #  本ソフトウェアは，無保証で提供されているものである．上記著作権者お
 #  よびTOPPERSプロジェクトは，本ソフトウェアに関して，特定の使用目的
 #  に対する適合性も含めて，いかなる保証も行わない．また，本ソフトウェ
 #  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
 #  の責任を負わない．
-# 
+#
 #  $Id: Makefile 650 2019-01-14 07:57:07Z ertl-hiro $
-# 
+#
 
 #
 #  ターゲットの指定（Makefile.targetで上書きされるのを防ぐため）
@@ -71,23 +71,23 @@ SRCDIR = ..
 #
 #  オブジェクトファイル名の拡張子の設定
 #
-OBJEXT = 
+OBJEXT =
 
 #
 #  カーネルライブラリ（libkernel.a）のディレクトリ名
 #  （カーネルライブラリもmake対象にする時は，空に定義する）
 #
-KERNEL_LIB = 
+KERNEL_LIB =
 
 #
 #  カーネルを関数単位でコンパイルするかどうかの定義
 #
-KERNEL_FUNCOBJS = 
+KERNEL_FUNCOBJS =
 
 #
 #  TECSを外すかどうかの定義
 #
-OMIT_TECS = 
+OMIT_TECS =
 
 #
 #  TECS関係ファイルのディレクトリの定義
@@ -97,12 +97,12 @@ TECSDIR = $(SRCDIR)/tecsgen
 #
 #  トレースログを取得するかどうかの定義
 #
-ENABLE_TRACE = 
+ENABLE_TRACE =
 
 #
 #  開発ツール（コンパイラ等）のディレクトリの定義
 #
-DEVTOOLDIR = 
+DEVTOOLDIR =
 
 #
 #  ユーティリティプログラムの名称
@@ -177,26 +177,21 @@ ifdef USE_CFG_PASS3
 endif
 CDEFS := $(CDEFS) -DTOPPERS_USE_QEMU
 INCLUDES := -I. -I$(SRCDIR)/include $(INCLUDES) -I$(SRCDIR)
-LDFLAGS := $(LDFLAGS) 
+LDFLAGS := $(LDFLAGS)
 LIBS := $(LIBS) $(CXXLIBS)
 CFLAGS = $(COPTS) $(CDEFS) $(INCLUDES)
 
 #
 #  アプリケーションプログラムに関する定義
 #
-APPLNAME = sample1
-APPLDIRS = $(SRCDIR)/sample
-APPL_CFG = sample1.cfg
-APPL_CDL = sample1.cdl
+APPLNAME = app
+APPLDIRS = $(SRCDIR)/app
+APPL_CFG = app.cfg
+APPL_CDL = app.cdl
 
 APPL_DIRS := $(APPLDIRS) $(SRCDIR)/library
 APPL_ASMOBJS :=
-ifdef USE_CXX
-	APPL_CXXOBJS := sample1.o
-	APPL_COBJS :=
-else
-	APPL_COBJS := sample1.o
-endif
+APPL_COBJS :=
 APPL_COBJS := $(APPL_COBJS) $(TECS_USER_COBJS) $(TECS_OUTOFDOMAIN_COBJS) \
 				log_output.o vasyslog.o t_perror.o strerror.o
 APPL_CFLAGS := $(APPL_CFLAGS)
@@ -326,7 +321,7 @@ vpath %.cdl $(APPL_DIRS)
 #
 #  中間オブジェクトファイルを置くディレクトリの処理
 #
-LDFLAGS := -L $(OBJDIR) $(LDFLAGS) 
+LDFLAGS := -L $(OBJDIR) $(LDFLAGS)
 APPL_ASMOBJS   := $(addprefix $(OBJDIR)/, $(APPL_ASMOBJS))
 APPL_CXXOBJS   := $(addprefix $(OBJDIR)/, $(APPL_CXXOBJS))
 APPL_COBJS     := $(addprefix $(OBJDIR)/, $(APPL_COBJS))
