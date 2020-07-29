@@ -1,0 +1,25 @@
+# -*- coding: utf-8 -*-
+#
+#		パス3の生成スクリプトのターゲット依存部（ダミーターゲット用）
+#
+#   $Id: target_opt.trb 626 2018-12-29 02:51:02Z ertl-hiro $
+# 
+
+#
+#  実施する最適化処理を指定
+#
+$OPTIMIZE_MEMINIB = true
+$OPTIMIZE_DATASEC_LIST = true
+$OPTIMIZE_BSSSEC_LIST = true
+
+#
+#  ターゲット非依存部のインクルード
+#
+IncludeTrb("kernel/kernel_opt.trb")
+
+#
+#  仮のリンカスクリプトの生成
+#
+$ldscript = GenFile.new("cfg3_out.ld")
+$modnameReplace = { "kernel_mem.o" => "kernel_mem3.o" }
+IncludeTrb("target_ldscript.trb")

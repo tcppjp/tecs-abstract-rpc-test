@@ -1,0 +1,45 @@
+# -*- coding: utf-8 -*-
+#
+#		パス4の生成スクリプトのターゲット依存部（ダミーターゲット用）
+#
+#   $Id: target_mem.trb 648 2019-01-14 05:26:19Z ertl-hiro $
+# 
+
+#
+#  ターゲット非依存部のインクルード
+#
+IncludeTrb("kernel/kernel_mem.trb")
+
+#
+#  メモリ保護単位に関する情報を生成する
+#
+GenerateMemProt()
+
+#
+#  メモリ保護単位に関するエラーチェック
+#
+# ここまでにエラーが検出されている場合には，余計なE_SYSエラーが出ない
+# ように，以下のエラーチェックをスキップする．
+#
+if !$errorFlag
+  $memProt.each do |_, params|
+    # メモリ保護単位の境界のチェック
+    if (params[:baseaddr] & ($DUMMY_PAGE_SIZE - 1)) != 0 \
+				|| (params[:aendaddr] & ($DUMMY_PAGE_SIZE - 1)) != 0
+      error("E_SYS: unaligned memory protection boundary " \
+				+ sprintf("[%x %x]", params[:baseaddr], params[:aendaddr]))
+    end
+  end
+end
+
+#
+#  エラーチェック処理
+#
+IncludeTrb("target_check.trb")
+
+#
+#  リンカスクリプトの生成
+#
+$ldscript = GenFile.new("ldscript.ld")
+$modnameReplace = {}
+IncludeTrb("target_ldscript.trb")

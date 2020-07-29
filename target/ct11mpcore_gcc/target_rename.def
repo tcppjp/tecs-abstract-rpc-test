@@ -1,0 +1,16 @@
+# target_kernel_impl.c
+target_initialize
+target_exit
+
+# target_timer.c
+target_totimer_initialize
+target_totimer_terminate
+target_twdtimer_start
+target_twdtimer_stop
+target_twdtimer_get_current
+target_ovrtimer_start
+target_ovrtimer_stop
+target_ovrtimer_get_current
+target_totimer_handler
+
+INCLUDE "core"

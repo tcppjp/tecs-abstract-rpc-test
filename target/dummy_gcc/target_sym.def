@@ -1,0 +1,9 @@
+DUMMY_PAGE_SIZE
+sizeof_TCB,sizeof(TCB)
+offsetof_TCB_p_tinib,"offsetof(TCB,p_tinib)"
+offsetof_TCB_sp,"offsetof(TCB,tskctxb.sp)"
+offsetof_TCB_pc,"offsetof(TCB,tskctxb.pc)"
+sizeof_TCB,sizeof(TCB)
+offsetof_TCB_p_tinib,"offsetof(TCB,p_tinib)"
+offsetof_TCB_p_dominib,"offsetof(TCB,p_dominib)"
+offsetof_TCB_svclevel,"offsetof(TCB,svclevel)"
