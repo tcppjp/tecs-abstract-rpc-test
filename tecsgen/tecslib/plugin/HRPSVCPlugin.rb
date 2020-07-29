@@ -651,7 +651,9 @@ EOT
               #  特定のドメインから接続されている場合は，呼出し元セルの
               #  restrictをチェック
               #
-              callable_domains << svcplugin.get_caller_cell.get_region.get_domain_root
+              unless callable_domains.nil?
+                  callable_domains << svcplugin.get_caller_cell.get_region.get_domain_root
+              end
           else
               # 
               #  無所属から結合されておらず，特定の呼出し元ドメインにアクセス権
