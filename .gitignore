@@ -1,0 +1,13 @@
+/app/gen
+/app/cfg*_out*
+/app/check.timestamp
+/app/hrp
+/app/hrp.syms
+/app/kernel_cfg*
+/app/kernel_mem*
+/app/kernel_opt*
+/app/*.a
+/app/objs
+/app/offset.*
+/app/omit_svc.h
+/app/ldscript.ld
