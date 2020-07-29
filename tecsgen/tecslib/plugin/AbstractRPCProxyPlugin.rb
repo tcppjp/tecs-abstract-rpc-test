@@ -2,9 +2,11 @@
 
 require_tecsgen_lib "lib/GenOpaqueMarshaler.rb"
 
-AbstractRPCClientProxyPluginArgProg = {
-    # Specifies the name of celltype to generate.
-    "celltypeName" => Proc.new { |obj, rhs| obj.set_celltype_name(rhs) },
+AbstractRPCProxyPluginArgProg = {
+    # Specifies the name of client celltype to generate.
+    "clientCelltypeName" => Proc.new { |obj, rhs| obj.set_client_celltype_name(rhs) },
+    # Specifies the name of server celltype to generate.
+    "serverCelltypeName" => Proc.new { |obj, rhs| obj.set_server_celltype_name(rhs) },
 }
 
 # The signature plugin for generating a Abstact Opaque RPC client proxy.
@@ -20,25 +22,41 @@ AbstractRPCClientProxyPluginArgProg = {
 #       /* ... */
 #   }
 #
-class AbstractRPCClientProxyPlugin < SignaturePlugin
+#   composite tSignatureServerProxy {
+#       call sSignature cCall;
+#       call sChannel cChannel;
+#       entry sUnmarshalerMain  eService;
+#       /* ... */
+#   }
+#
+class AbstractRPCProxyPlugin < SignaturePlugin
     def initialize(signature, option)
         super
 
         # Parse the plugin parameters
-        @plugin_arg_check_proc_tab = AbstractRPCClientProxyPluginArgProg
+        @plugin_arg_check_proc_tab = AbstractRPCProxyPluginArgProg
         @plugin_arg_str = option
         @plugin_arg_str.sub!( /\A"(.*)/, '\1' )    # strip "" around the parameters
         @plugin_arg_str.sub!( /(.*)"\z/, '\1' )
         parse_plugin_arg
 
-        unless @celltype_name
-            cdl_error("ATRPC000 signature $1: the plugin option `celltypeName` is not specified",
+        unless @client_celltype_name
+            cdl_error("ATRPC000 signature $1: the plugin option `clientCelltypeName` is not specified",
+                signature.get_name)
+        end
+
+        unless @server_celltype_name
+            cdl_error("ATRPC000 signature $1: the plugin option `serverCelltypeName` is not specified",
                 signature.get_name)
         end
     end
 
-    def set_celltype_name(value)
-        @celltype_name = value
+    def set_server_celltype_name(value)
+        @server_celltype_name = value
+    end
+
+    def set_client_celltype_name(value)
+        @client_celltype_name = value
     end
 
     # I suppose this is where the plugin is supposed to generate extra CDL code
@@ -57,7 +75,7 @@ class AbstractRPCClientProxyPlugin < SignaturePlugin
         file.print "import(\"#{marshaler_gen.cdl_file_name}\");\n"
 
         # Generate the client proxy celltype definition
-        file.print "composite #{@celltype_name} {\n"
+        file.print "composite #{@client_celltype_name} {\n"
         file.print "  entry #{@signature.get_namespace_path} eEntry;\n"
         file.print "  call sChannel cChannel;\n"
         file.print "  \n"
@@ -70,6 +88,24 @@ class AbstractRPCClientProxyPlugin < SignaturePlugin
         file.print "  };\n"
         file.print "  \n"
         file.print "  eEntry => Marshal.eClientEntry;\n"
+        file.print "};\n"
+
+        # Generate the server proxy celltype definition
+        file.print "composite #{@server_celltype_name} {\n"
+        file.print "  call #{@signature.get_namespace_path} cCall;\n"
+        file.print "  call sChannel cChannel;\n"
+        file.print "  entry sUnmarshalerMain eService;\n"
+        file.print "  \n"
+        file.print "  cell #{marshaler_gen.unmarshaler_celltype_name} Marshal {\n"
+        file.print "    cTDR = TDR.eTDR;\n"
+        file.print "    cServerCall => composite.cCall;\n"
+        file.print "  };\n"
+        file.print "  \n"
+        file.print "  cell tTDR TDR {\n"
+        file.print "    cChannel => composite.cChannel;\n"
+        file.print "  };\n"
+        file.print "  \n"
+        file.print "  eService => Marshal.eService;\n"
         file.print "};\n"
     end
 
@@ -139,11 +175,26 @@ class MarshalerGenerator
         @marshaler_celltype_name
     end
 
+    # Get the path to the unmarshaler celltype. The celltype looks like the
+    # following:
+    #
+    #     celltype #{@unmarshaler_celltype_name} {
+    #       call #{@signature.get_namespace_path} cServerCall;
+    #       call  sTDR       cTDR;
+    #       [optional]
+    #         call sRPCErrorHandler cErrorHandler;
+    #       entry sUnmarshalerMain  eService;
+    #     };
+    #
+    def unmarshaler_celltype_name
+        @unmarshaler_celltype_name
+    end
+
     # `GenOpaqueMarshaler` thinks `self` is an instance of a subclass of
     # `ThroughPlugin`, which has a method named `subst_name`. Pretend we are
     # `ThroughPlugin` so that the interpreter doesn't get furious when finding
     # out that `self` doesn't have `subst_name`.
     def subst_name hoge
-        return hoge
+        hoge
     end
 end

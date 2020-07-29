@@ -9,5 +9,13 @@ signature sGreet { ER greetInKlingon(void); };
 //         /* ... */
 //     }
 //
-generate(AbstractRPCClientProxyPlugin, sGreet,
-         "celltypeName = tGreetClientProxy");
+//     composite tGreetServerProxy {
+//         call sGreet cEntry;
+//         call sChannel cChannel;
+//         entry sUnmarshalerMain  eService;
+//         /* ... */
+//     }
+//
+generate(AbstractRPCProxyPlugin, sGreet,
+         "clientCelltypeName = tGreetClientProxy, "
+         "serverCelltypeName = tGreetServerProxy, ");

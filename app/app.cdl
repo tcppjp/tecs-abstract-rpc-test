@@ -123,11 +123,33 @@ cell tDataqueueAdaptor GreetChannelToDataqueue {
 //
 //////////////////////////////////////////////////////////////////////////
 
-[domain(HRP, "user")]
-region rServerDomain {
+celltype tPerson { entry sGreet eGreet; };
 
-cell tDataqueueOWChannel GreetTransport {};
+[domain(HRP, "user")] region rServerDomain {
+    cell tDataqueueOWChannel GreetTransport{};
 
-// TODO: server
+    cell tDataqueueAdaptor GreetChannelToDataqueue2 {
+        cDataqueue = GreetTransport.eDataqueue;
+        cEventflag = GreetTransport.eEventflag;
+    };
 
+    cell tGreetServerProxy GreetServerProxy {
+        cChannel = GreetChannelToDataqueue2.eChannel;
+        cCall = Person.eGreet;
+    };
+
+    cell tTask ServerTask {
+        cTaskBody = ServerTaskBodyToService.eMain;
+        attribute = C_EXP("TA_ACT");
+        priority = C_EXP("MAIN_PRIORITY");
+        stackSize = C_EXP("STACK_SIZE");
+    };
+
+    cell tRPCDedicatedTaskMain ServerTaskBodyToService {
+        cMain = GreetServerProxy.eService;
+    };
+
+    cell tPerson Person{};
+
+    // TODO: server
 }; // region rServerDomain
