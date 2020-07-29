@@ -31,6 +31,12 @@
  * oneway:       false
  * #[</ENTRY_FUNC>]# */
 void eMain_main() {
+    syslog(LOG_NOTICE, "Commencing greeting.");
+    ER e = cGreet_greetInKlingon();
+    if (e < 0) {
+        syslog(LOG_NOTICE, "Greeting failed: %d", e);
+    }
+
     syslog(LOG_NOTICE, "-- end of application --");
     exitKernel();
     while (1) {
