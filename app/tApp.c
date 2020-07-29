@@ -14,8 +14,8 @@
 #include "tApp_tecsgen.h"
 
 #ifndef E_OK
-#define	E_OK	0		/* success */
-#define	E_ID	(-18)	/* illegal ID */
+#define E_OK 0     /* success */
+#define E_ID (-18) /* illegal ID */
 #endif
 
 /* entry port function #_TEPF_# */
@@ -30,12 +30,11 @@
  * global_name:  tApp_eMain_main
  * oneway:       false
  * #[</ENTRY_FUNC>]# */
-void
-eMain_main()
-{
+void eMain_main() {
     syslog(LOG_NOTICE, "-- end of application --");
     exitKernel();
-    while (1) {}
+    while (1) {
+    }
 }
 
 /* #[<POSTAMBLE>]#
