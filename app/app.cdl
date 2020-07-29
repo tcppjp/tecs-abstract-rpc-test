@@ -104,8 +104,8 @@ cell tGreetClientProxy GreetClientProxy {
 // `sChannel` → `cDataqueue` + `sEevntflag`
 cell tDataqueueAdaptor GreetChannelToDataqueue {
     // TODO: Make this connection dynamic
-    cDataqueue = rServerDomain::GreetTransport.eDataqueue;
-    cEventflag = rServerDomain::GreetTransport.eEventflag;
+    cDataqueue = GreetTransport.eDataqueue;
+    cEventflag = GreetTransport.eEventflag;
 };
 
 [domain(HRP, "user")] region rAppDomain {
@@ -125,9 +125,13 @@ cell tDataqueueAdaptor GreetChannelToDataqueue {
 
 celltype tPerson { entry sGreet eGreet; };
 
-[domain(HRP, "user")] region rServerDomain {
-    cell tDataqueueOWChannel GreetTransport{};
+// `tDataqueue_INIB_tab` must be located in a region readable by a task running
+// in `rAppDomain`. This means we can't put this in `rServerDomain` unless we
+// also configure the memory access permission for the region. I'm not willing
+// to do this at the moment.
+cell tDataqueueOWChannel GreetTransport{};
 
+[domain(HRP, "user")] region rServerDomain {
     cell tDataqueueAdaptor GreetChannelToDataqueue2 {
         cDataqueue = GreetTransport.eDataqueue;
         cEventflag = GreetTransport.eEventflag;
