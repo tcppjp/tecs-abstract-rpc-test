@@ -111,8 +111,10 @@ cell tKernel HRPKernel{};
     };
 
     // `sChannel` → `cMessageBuffer`
+    // This is the raw transport of the RPC channel we built. Notice that,
+    // unlike the normal ways of doing RPC in TECS, you can see the inner
+    // mechanism directly in the application CDL file.
     cell tMessageBufferCEP GreetChannelToMessageBuffer {
-        // TODO: Make this connection dynamic
         cMessageBuffer0 = GreetTransport0.eMessageBuffer;
         cMessageBuffer1 = GreetTransport1.eMessageBuffer;
     };
@@ -140,16 +142,23 @@ cell tMessageBuffer GreetTransport1 {
 };
 
 [domain(HRP, "user")] region rServerDomain {
+    // The receiving end of the raw transport.
     cell tMessageBufferCEP GreetChannelToMessageBuffer2 {
         cMessageBuffer0 = GreetTransport1.eMessageBuffer;
         cMessageBuffer1 = GreetTransport0.eMessageBuffer;
     };
 
+    // `tGreetServerProxy` is an RPC server proxy for the signature `sGreet`.
+    // When the entry point `GreetServerProxy.eService`, it enters a listening
+    // loop, where it listens for message (by constantly checking
+    // `GreetChannelToMessageBuffer2` for new incoming data) and takes an
+    // appropriate action upon reception.
     cell tGreetServerProxy GreetServerProxy {
         cChannel = GreetChannelToMessageBuffer2.eChannel;
         cCall = Person.eGreet;
     };
 
+    // The server task is responsible for processing received requests.
     cell tTask ServerTask {
         cTaskBody = ServerTaskBodyToService.eMain;
         attribute = C_EXP("TA_ACT");
@@ -157,11 +166,11 @@ cell tMessageBuffer GreetTransport1 {
         stackSize = C_EXP("STACK_SIZE");
     };
 
+    // `sTaskBody` → `sUnmarshalerMain`
     cell tRPCDedicatedTaskMain ServerTaskBodyToService {
         cMain = GreetServerProxy.eService;
     };
 
+    // This is the final destination of greeting requests.
     cell tPerson Person{};
-
-    // TODO: server
 }; // region rServerDomain
